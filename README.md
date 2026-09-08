@@ -27,6 +27,34 @@ py -3.13 -m streamlit run src/app.py
 
 Then open the URL shown in the terminal (usually http://localhost:8501).
 
+## Streamlit Cloud
+
+The app reads ratings from Google Sheets (`GoogleSheets.load_clean`), not from the Excel file. Secrets stay out of git (`.streamlit/secrets.toml` is gitignored).
+
+1. Push this repo to GitHub, including `src/app.py`, `src/google_sheets_api.py`, and `requirements.txt`.
+2. At [share.streamlit.io](https://share.streamlit.io), deploy the repo with **Main file path** `src/app.py`.
+3. In **Advanced settings**, pick **Python 3.13** (or 3.12). Do not leave the default if it is 3.14 — installs can fail.
+4. In **Secrets**, paste TOML that matches local `.streamlit/secrets.toml`:
+
+```toml
+wine_ratings_sheet_id = "YOUR_SPREADSHEET_ID"
+
+[google_api]
+type = "service_account"
+project_id = "your-project-id"
+private_key_id = "..."
+private_key = "-----BEGIN PRIVATE KEY-----\n...\n-----END PRIVATE KEY-----\n"
+client_email = "....iam.gserviceaccount.com"
+client_id = "..."
+auth_uri = "https://accounts.google.com/o/oauth2/auth"
+token_uri = "https://oauth2.googleapis.com/token"
+auth_provider_x509_cert_url = "https://www.googleapis.com/oauth2/v1/certs"
+client_x509_cert_url = "https://www.googleapis.com/robot/v1/metadata/x509/...."
+universe_domain = "googleapis.com"
+```
+
+Quote `client_id` and keep `\n` in `private_key`. Share the spreadsheet with the service account `client_email` as Editor, and keep a worksheet named `clean`.
+
 ## Project layout
 
 ```
