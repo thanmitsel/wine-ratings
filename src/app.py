@@ -5,6 +5,7 @@ Wine picker — filter Tom's wine ratings by name, category, shop, price, and ra
 from __future__ import annotations
 
 from pathlib import Path
+from google_sheets_api import GoogleSheets
 
 import pandas as pd
 import streamlit as st
@@ -28,10 +29,7 @@ def rating_rank(rating: str) -> int:
     except ValueError:
         return len(RATING_ORDER) + 1
 
-
-@st.cache_data
-def load_wines(_mtime: float) -> pd.DataFrame:
-    df = pd.read_excel(DATA_PATH)
+def clean_cols(df):
     # Normalize the pound-price column name (encoding can mangle the £ sign)
     price_col = next(c for c in df.columns if str(c).startswith("Price"))
     df = df.rename(columns={price_col: "Price"})
@@ -40,13 +38,26 @@ def load_wines(_mtime: float) -> pd.DataFrame:
     df["Tom's Pick"] = df["Tom's Pick"].astype(str).str.strip()
     return df
 
+@st.cache_data
+def load_wines(_mtime: float) -> pd.DataFrame:
+    df = pd.read_excel(DATA_PATH)
+    return clean_cols(df)
+
+# Load dataset from google sheet
+@st.cache_resource
+def load_google_sheet(aplatform):
+    # Replace with your dataset
+    sheet_obj = GoogleSheets(aplatform)
+    df_ = sheet_obj.load_clean()
+    return clean_cols(df_)
 
 def main() -> None:
     st.set_page_config(page_title="Wine Picker", page_icon="🍷", layout="wide")
     st.title("Wine Picker")
     st.caption("Find the right bottle from Tom's wine ratings.")
 
-    df = load_wines(DATA_PATH.stat().st_mtime)
+    # df = load_wines(DATA_PATH.stat().st_mtime)
+    df = load_google_sheet('wine_ratings')
 
     with st.sidebar:
         st.header("Filters")
