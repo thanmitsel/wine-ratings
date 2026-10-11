@@ -43,10 +43,9 @@ def load_wines(_mtime: float) -> pd.DataFrame:
     df = pd.read_excel(DATA_PATH)
     return clean_cols(df)
 
-# Load dataset from google sheet
+# Load dataset from google sheet (read-only; do not upload from the app)
 @st.cache_resource
 def load_google_sheet(aplatform):
-    # Replace with your dataset
     sheet_obj = GoogleSheets(aplatform)
     df_ = sheet_obj.load_clean()
     return clean_cols(df_)

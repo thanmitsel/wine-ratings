@@ -1,3 +1,20 @@
+"""
+Sync local CSV data with the Google Sheet used by the Streamlit app.
+
+Secrets (`.streamlit/secrets.toml`): `google_api`, `wine_ratings_sheet_id`.
+The spreadsheet must have a worksheet named `clean`.
+
+Usage (from the project root):
+
+    py -3.13 src/google_sheets_api.py --mode upload
+        Read data/wine_ratings.csv and write it to the `clean` worksheet.
+
+    py -3.13 src/google_sheets_api.py --mode load
+        Read the `clean` worksheet and print the first rows (default).
+
+    py -3.13 src/google_sheets_api.py --help
+"""
+
 import os
 import pandas as pd
 import gspread
@@ -49,11 +66,37 @@ class GoogleSheets:
         
         
 if __name__ == "__main__":
-    # Call and Download Websites
+    import argparse
+
+    parser = argparse.ArgumentParser(
+        description=(
+            "Upload data/<platform>.csv to Google Sheets, or load the sheet. "
+            "The Streamlit app always loads; it never uploads."
+        ),
+        epilog=(
+            "Examples (from the project root):\n"
+            "  py -3.13 src/google_sheets_api.py --mode upload\n"
+            "  py -3.13 src/google_sheets_api.py --mode load\n"
+        ),
+        formatter_class=argparse.RawDescriptionHelpFormatter,
+    )
+    parser.add_argument(
+        "--mode",
+        choices=["upload", "load"],
+        default="load",
+        help=(
+            "upload: write data/<platform>.csv to the 'clean' worksheet. "
+            "load: read the 'clean' worksheet and print the first rows (default)."
+        ),
+    )
+    args = parser.parse_args()
+
     data_path = 'C:\\Users\\Thanasis\\Documents\\Programming Projects\\wine-ratings\\data\\'
     aplatform = 'wine_ratings'
     sheet_obj = GoogleSheets(aplatform)
-    # df = sheet_obj.read_clean_df(data_path)
-    # sheet_obj.upload_clean(df)
-    df_load = sheet_obj.load_clean()
-    print(df_load)
+    if args.mode == "upload":
+        df = sheet_obj.read_clean_df(data_path)
+        sheet_obj.upload_clean(df)
+    else:
+        df = sheet_obj.load_clean()
+    print(df.head())

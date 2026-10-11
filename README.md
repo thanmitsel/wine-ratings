@@ -14,7 +14,7 @@ A simple [Streamlit](https://streamlit.io/) app that helps you choose a wine fro
 ## Requirements
 
 - **Python 3.13** (or another 3.9+ install — the project’s default `python` on this machine is 3.7, which Streamlit does not support)
-- Dependencies in `requirements.txt`: `streamlit`, `pandas`, `openpyxl`
+- Dependencies in `requirements.txt`: `streamlit`, `pandas`, `openpyxl`, `gspread`, `google-auth`, `gspread-dataframe`
 
 ## How to run
 
@@ -26,6 +26,23 @@ py -3.13 -m streamlit run src/app.py
 ```
 
 Then open the URL shown in the terminal (usually http://localhost:8501).
+
+## Google Sheets script modes
+
+`src/google_sheets_api.py` is a CLI for the same sheet the app reads. The app only **loads**. Use this script when you need to **upload** a CSV.
+
+From the project root (needs `.streamlit/secrets.toml` with `google_api` and `wine_ratings_sheet_id`):
+
+```powershell
+py -3.13 src/google_sheets_api.py --mode upload
+py -3.13 src/google_sheets_api.py --mode load
+py -3.13 src/google_sheets_api.py --help
+```
+
+| Mode | What it does |
+|------|----------------|
+| `upload` | Reads `data/wine_ratings.csv` and writes the `clean` worksheet |
+| `load` | Reads the `clean` worksheet and prints the first rows (default if you omit `--mode`) |
 
 ## Streamlit Cloud
 
@@ -65,7 +82,8 @@ WineWanker/
 │   ├── Wine Ratings.xlsx     # Main ratings data (used by the app)
 │   └── wine_youtube_videos.xlsx
 ├── src/
-│   └── app.py                # Streamlit wine picker
+│   ├── app.py                # Streamlit wine picker
+│   └── google_sheets_api.py  # CLI: --mode upload | load
 └── tom_gibley_pics/          # Thumbnail / reference images (not used by the app yet)
 ```
 
